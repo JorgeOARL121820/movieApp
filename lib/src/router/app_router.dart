@@ -22,7 +22,14 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state, Widget child) {
         return ScaffoldBottomNavbar(child: child);
       },
-      routes: const <RouteBase>[],
+      routes: <RouteBase>[
+        GoRoute(
+          path: MapPage.route,
+          builder: (BuildContext context, GoRouterState state) {
+            return const MapPage();
+          },
+        ),
+      ],
     ),
   ],
 );

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class NavigationBarItem {
   NavigationBarItem(
@@ -7,5 +7,5 @@ class NavigationBarItem {
   final GlobalKey? id;
   final String route;
   final String? label;
-  final String imageIcon;
+  final dynamic imageIcon;
 }

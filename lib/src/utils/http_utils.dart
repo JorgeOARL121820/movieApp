@@ -119,13 +119,13 @@ class Api {
       if (response.data is String) {
         jsonResponse = <String, dynamic>{
           'statusCode': response.statusCode,
-          'data': response.data,
+          'data': response.data.toString(),
           'message': null,
         };
       } else {
         jsonResponse = <String, dynamic>{
           'statusCode': response.statusCode,
-          'data': response.data!['data'],
+          'data': response.data,
           'message': response.data!['message']
         };
       }
@@ -136,8 +136,8 @@ class Api {
 
         jsonResponse = <String, dynamic>{
           'statusCode': error.response?.statusCode,
-          'data': data['data'],
-          'message': data['message']
+          'data': data['status_code'],
+          'message': data['status_message']
         };
       } catch (_) {
         jsonResponse = <String, dynamic>{

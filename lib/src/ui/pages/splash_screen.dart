@@ -1,12 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:movie_app/src/ui/pages/pages.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   static const String route = "/";
 
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    loadNextPage();
+  }
+
+  void loadNextPage() {
+    Future<void>.delayed(const Duration(milliseconds: 4000), () {
+      context.go(MapPage.route);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SizedBox.expand(
+        child: Image.asset(
+          'assets/images/splash.gif',
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
   }
 }
