@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/data/api/api_repository.dart';
+import 'package:movie_app/src/data/api/enum/api_movie_type.dart';
+import 'package:movie_app/src/data/models/account/account_model.dart';
 import 'package:movie_app/src/data/models/genre/genre_model.dart';
 import 'package:movie_app/src/data/models/movie/movie_model.dart';
 import 'package:movie_app/src/models/error_model.dart';
@@ -12,70 +16,119 @@ class ApiBloc extends Bloc<ApiEvent, ApiState> {
     on<ApiEvent>((event, emit) async {
       switch (event) {
         case GetMoviesEvent _:
-          emit(
-              MovieLoaderState(catMovies: state.catMovies, catTv: state.catTv));
+          if (event.page != 1) {
+            emit(MovieLoaderPaginationState(catMovies: state.catMovies));
+          } else {
+            emit(MovieLoaderState(
+              catMovies: state.catMovies,
+            ));
+          }
 
           final (ErrorModel?, List<MovieModel>?) response =
-              await apiRepository.getMoviesTVList(
-                  genres: event.genres,
-                  isMovie: event.movies,
-                  page: event.page,
-                  search: event.search);
+              await apiRepository.getMoviesList(
+            type: event.type,
+            genres: event.genres,
+            page: event.page,
+          );
 
           if (response.$1 != null) {
-            emit(ErrorAppState(response.$1!,
-                catMovies: state.catMovies, catTv: state.catTv));
+            emit(ErrorAppState(
+              response.$1!,
+              page: event.page,
+              catMovies: state.catMovies,
+            ));
           }
 
           if (response.$2 != null) {
             emit(SuccessInfoState(
-                films: response.$2,
-                catMovies: state.catMovies,
-                catTv: state.catTv));
+              type: event.type,
+              films: response.$2,
+              catMovies: state.catMovies,
+            ));
           }
 
         case GetCatsEvent _:
-          emit(
-              MovieLoaderState(catMovies: state.catMovies, catTv: state.catTv));
-          (ErrorModel?, List<GenreModel>?) response;
-
-          if (event.movies) {
-            response = await apiRepository.getCats();
-          } else {
-            response = await apiRepository.getCatsTv();
-          }
+          emit(MovieLoaderState(
+            catMovies: state.catMovies,
+          ));
+          (ErrorModel?, List<GenreModel>?) response =
+              await apiRepository.getCats();
 
           if (response.$1 != null) {
-            emit(ErrorAppState(response.$1!,
-                catMovies: state.catMovies, catTv: state.catTv));
-          }
-
-          if (response.$2 != null) {
-            if (event.movies) {
-              emit(
-                  SuccessInfoState(catMovies: response.$2, catTv: state.catTv));
-            } else {
-              emit(SuccessInfoState(
-                  catTv: response.$2, catMovies: state.catMovies));
-            }
-          }
-        case GetDetailsMovieEvent _:
-          emit(
-              MovieLoaderState(catMovies: state.catMovies, catTv: state.catTv));
-
-          final (ErrorModel?, MovieDetailsModel?) response = await apiRepository
-              .getDetails(event.movieId, isMovie: event.movie);
-
-          if (response.$1 != null) {
-            emit(ErrorAppState(response.$1!,
-                catMovies: state.catMovies, catTv: state.catTv));
+            emit(ErrorAppState(
+              response.$1!,
+              catMovies: state.catMovies,
+            ));
           }
 
           if (response.$2 != null) {
             emit(SuccessInfoState(
-                dettails: response.$2,
-                catMovies: state.catMovies,
-                catTv: state.catTv));
+              catMovies: response.$2,
+            ));
+          }
+        case GetDetailsMovieEvent _:
+          emit(MovieLoaderDetailsState(
+            catMovies: state.catMovies,
+          ));
+
+          final (ErrorModel?, MovieDetailsModel?) response =
+              await apiRepository.getDetails(event.movieId);
+
+          if (response.$1 != null) {
+            emit(ErrorAppState(response.$1!,
+                catMovies: state.catMovies, closeModal: true));
+          }
+
+          if (response.$2 != null) {
+            emit(SuccessInfoState(
+              dettails: response.$2,
+              catMovies: state.catMovies,
+            ));
+          }
+
+        case GetAccountEvent _:
+          emit(MovieLoaderState(catMovies: state.catMovies));
+
+          final response = await apiRepository.getAccountInfo();
+
+          if (response.$1 != null) {
+            emit(ErrorAppState(response.$1!, catMovies: state.catMovies));
+          }
+
+          if (response.$2 != null) {
+            emit(SuccessInfoState(
+                catMovies: state.catMovies, account: response.$2));
+          }
+
+        case UploadFileEvent _:
+          emit(MovieLoaderState(catMovies: state.catMovies));
+
+          final (ErrorModel?, String?) response =
+              await apiRepository.saveFile(event.file);
+
+          if (response.$1 != null) {
+            emit(ErrorAppState(response.$1!, catMovies: state.catMovies));
+          }
+
+          if (response.$2 != null) {
+            emit(SuccessInfoState(
+                catMovies: state.catMovies, message: response.$2));
+
+            add(GetAllFilesEvent());
+          }
+
+        case GetAllFilesEvent _:
+          emit(MovieLoaderFilesState(catMovies: state.catMovies));
+
+          final (ErrorModel?, List<String>?) response =
+              await apiRepository.getAllFiles();
+
+          if (response.$1 != null) {
+            emit(ErrorAppState(response.$1!, catMovies: state.catMovies));
+          }
+
+          if (response.$2 != null) {
+            emit(SuccessFilesState(response.$2 ?? <String>[]));
           }
       }
     });

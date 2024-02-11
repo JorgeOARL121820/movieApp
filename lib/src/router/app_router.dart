@@ -29,6 +29,18 @@ final GoRouter appRouter = GoRouter(
             return const MapPage();
           },
         ),
+        GoRoute(
+          path: HomeVideoAppPage.route,
+          builder: (BuildContext context, GoRouterState state) {
+            return const HomeVideoAppPage();
+          },
+        ),
+        GoRoute(
+          path: ProfilePage.route,
+          builder: (context, state) {
+            return const ProfilePage();
+          },
+        )
       ],
     ),
   ],

@@ -1,20 +1,27 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/enviroment/enviroment.dart';
+import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/data/api/bloc/api_bloc.dart';
 import 'package:movie_app/src/router/app_router.dart';
 import 'package:movie_app/src/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:movie_app/injector.dart' as di;
+import 'package:sizer/sizer.dart';
 
 void main() async {
   /// Para asegurarnos que todo se inicializa antes de empezar la app
   WidgetsFlutterBinding.ensureInitialized();
 
   prefs = await SharedPreferences.getInstance();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   ///Se genera el enviroment
   environment = Environment.env;
@@ -55,11 +62,14 @@ class _MyAppState extends State<MyApp> {
       providers: <BlocProvider<dynamic>>[
         BlocProvider<ApiBloc>(create: (_) => di.locator<ApiBloc>()),
       ],
-      child: MaterialApp.router(
-          routerConfig: appRouter,
-          themeMode: ThemeMode.dark,
-          title: environment.appName,
-          theme: ThemeData.dark(useMaterial3: true)),
+      child: Sizer(builder: (BuildContext context, Orientation orientation,
+          DeviceType deviceYType) {
+        return MaterialApp.router(
+            routerConfig: appRouter,
+            themeMode: ThemeMode.dark,
+            title: environment.appName,
+            theme: ThemeData.dark(useMaterial3: true));
+      }),
     );
   }
 }

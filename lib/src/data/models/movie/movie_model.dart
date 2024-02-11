@@ -29,7 +29,7 @@ class MovieModel extends MovieEntity {
   factory MovieModel.fromMap(Map<String, dynamic> json) => MovieModel(
       adult: json['adult'],
       backdrop_path: json['backdrop_path'],
-      genre_ids: json['genre_ids'].cast<int>(),
+      genre_ids: json['genre_ids']?.cast<int>(),
       id: json['id'],
       original_language: json['original_language'],
       original_title: json['original_title'],
@@ -43,7 +43,7 @@ class MovieModel extends MovieEntity {
       vote_count: json['vote_count'],
       first_air_date: json['first_air_date'],
       name: json['name'],
-      origin_country: json['origin_country'].cast<String>(),
+      origin_country: json['origin_country']?.cast<String>(),
       original_name: json['original_name']);
 
   Map<String, dynamic> toJson() => <String, dynamic>{

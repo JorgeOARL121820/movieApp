@@ -15,10 +15,10 @@ List<NavigationBarItem> tabs = <NavigationBarItem>[
   NavigationBarItem(
     route: MapPage.route,
     imageIcon: Bootstrap.globe_americas,
-    label: 'Mapa',
+    label: '',
   ),
   NavigationBarItem(
-    route: "/d",
+    route: ProfilePage.route,
     imageIcon: HeroIcons.user,
     label: '',
   ),
@@ -145,7 +145,7 @@ class _ScaffoldBottomNavbarState extends State<ScaffoldBottomNavbar> {
 
   BoxDecoration _decorationItem(bool selected) {
     return BoxDecoration(
-      color: selected ? Colors.white : Colors.black,
+      color: selected ? Colors.white : Colors.transparent,
       borderRadius: BorderRadius.circular(50),
     );
   }

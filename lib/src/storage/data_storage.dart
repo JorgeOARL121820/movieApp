@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:movie_app/src/data/api/enum/api_movie_type.dart';
+import 'package:movie_app/src/data/models/account/account_model.dart';
 import 'package:movie_app/src/data/models/genre/genre_model.dart';
 import 'package:movie_app/src/data/models/movie/movie_model.dart';
 import 'package:movie_app/src/utils/utils.dart';
@@ -7,67 +9,45 @@ import 'package:movie_app/src/utils/utils.dart';
 enum DataStorageKey {
   details("ST_Details"),
   moviesPerPage("ST_MOVIES_PP"),
-  genreTv("GENRE_TV"),
-  genreMovie("GENRE_MOVIE"),
-  imagesMovies("ST_IMAGES_MOVIES");
+  popular("ST_POPULAR"),
+  upcoming("ST_UPCOMING"),
+  topRated("ST_TOP_RATED"),
+  nowPlaying("ST_NOW_PLAYING"),
+  account("ST_ACCOUNT"),
+  genreMovie("ST_GENRE_MOVIE");
 
   const DataStorageKey(this.name);
   final String name;
 }
 
 class Storage {
-  void saveGenre({List<GenreModel>? tv, List<GenreModel>? movies}) {
-    if (tv != null) {
-      prefs.setString(DataStorageKey.genreTv.name, json.encode(tv));
-    } else {
-      prefs.setString(DataStorageKey.genreMovie.name, json.encode(movies));
-    }
+  void saveAccount(AccountModel account) {
+    prefs.setString(DataStorageKey.account.name, account.toString());
   }
 
-  List<GenreModel> getGenreModel({bool tv = false}) {
-    if (tv) {
-      return ((json
-                  .decode(prefs.getString(DataStorageKey.genreTv.name) ?? '[]'))
-              as List<dynamic>)
-          .map((dynamic e) => GenreModel.fromMap(e as Map<String, dynamic>))
-          .toList();
-    } else {
-      return ((json.decode(
-                  prefs.getString(DataStorageKey.genreMovie.name) ?? '[]'))
-              as List<dynamic>)
-          .map((dynamic e) => GenreModel.fromMap(e as Map<String, dynamic>))
-          .toList();
-    }
+  AccountModel? getAccount() {
+    return AccountModel.fromMap(
+        json.decode(prefs.getString(DataStorageKey.account.name) ?? '{}'));
   }
 
-  void saveImage(int movieId, String imageB64) {
-    final Map<String, dynamic> images = getImage(allImages: true);
-
-    images["$movieId"] = imageB64;
-
-    prefs.setString(DataStorageKey.imagesMovies.name, json.encode(images));
+  void saveGenre({List<GenreModel>? movies}) {
+    prefs.setString(DataStorageKey.genreMovie.name, json.encode(movies));
   }
 
-  dynamic getImage({bool allImages = false, int? movieId}) {
-    if (allImages) {
-      return json
-          .decode(prefs.getString(DataStorageKey.imagesMovies.name) ?? '{}');
-    } else if (movieId != null) {
-      final Map<String, dynamic> images = json
-          .decode(prefs.getString(DataStorageKey.imagesMovies.name) ?? '{}');
-
-      return images['$movieId'];
-    } else {
-      return null;
-    }
+  List<GenreModel> getGenreModel() {
+    return ((json.decode(
+                prefs.getString(DataStorageKey.genreMovie.name) ?? '[]'))
+            as List<dynamic>)
+        .map((dynamic e) => GenreModel.fromMap(e as Map<String, dynamic>))
+        .toList();
   }
 
-  void saveMoviesPerPage(int page, List<MovieModel> movies) {
+  void saveMoviesPerPage(int page, List<MovieModel> moviesToSaved) {
     final Map<String, dynamic> movies = getMoviesPerPage(allPages: true);
 
-    movies["$page"] = movies;
+    movies["$page"] = moviesToSaved;
 
-    prefs.setString(DataStorageKey.details.name, json.encode(movies));
+    prefs.setString(DataStorageKey.moviesPerPage.name, json.encode(movies));
   }
 
   dynamic getMoviesPerPage({bool allPages = false, int? page}) {
@@ -78,18 +58,46 @@ class Storage {
       final Map<String, dynamic> moviesPerPage = json
           .decode(prefs.getString(DataStorageKey.moviesPerPage.name) ?? '{}');
 
-      return (moviesPerPage["$page"] as List<dynamic>)
-          .map((dynamic e) => MovieModel.fromMap(e as Map<String, dynamic>))
+      return (moviesPerPage["$page"] as List<dynamic>?)
+          ?.map((dynamic e) => MovieModel.fromMap(e as Map<String, dynamic>))
           .toList();
     } else {
       return null;
     }
   }
 
+  void saveMovies(List<MovieModel> movies, MovieCatType type) {
+    prefs.setString(
+        type == MovieCatType.nowPlaying
+            ? DataStorageKey.nowPlaying.name
+            : type == MovieCatType.popular
+                ? DataStorageKey.popular.name
+                : type == MovieCatType.topRated
+                    ? DataStorageKey.topRated.name
+                    : DataStorageKey.upcoming.name,
+        json.encode(movies));
+  }
+
+  List<MovieModel> getMovies(MovieCatType type) {
+    final List<dynamic> movies =
+        json.decode(prefs.getString(type == MovieCatType.nowPlaying
+                ? DataStorageKey.nowPlaying.name
+                : type == MovieCatType.popular
+                    ? DataStorageKey.popular.name
+                    : type == MovieCatType.topRated
+                        ? DataStorageKey.topRated.name
+                        : DataStorageKey.upcoming.name) ??
+            '[]');
+
+    return movies
+        .map((dynamic e) => MovieModel.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<void> saveDetails(int movieId, MovieDetailsModel movie) async {
     final Map<String, dynamic> movies = getDetailsMovie(all: true);
 
-    movies["$movieId"] = movie;
+    movies["$movieId"] = movie.toString();
 
     prefs.setString(DataStorageKey.details.name, json.encode(movies));
   }
@@ -101,7 +109,7 @@ class Storage {
       Map<String, dynamic> movies =
           json.decode(prefs.getString(DataStorageKey.details.name) ?? '{}');
 
-      return MovieDetailsModel.fromMap(movies["$movieId"]);
+      return MovieDetailsModel.fromMap(json.decode(movies["$movieId"] ?? '{}'));
     } else {
       return null;
     }

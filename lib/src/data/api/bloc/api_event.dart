@@ -3,20 +3,31 @@ part of 'api_bloc.dart';
 abstract class ApiEvent {}
 
 class GetMoviesEvent extends ApiEvent {
-  GetMoviesEvent(this.movies, this.page, this.genres, this.search);
-  final bool movies;
+  GetMoviesEvent(this.page, this.genres, this.type);
+
   final int page;
-  final List<String>? genres;
-  final String? search;
+  final List<int>? genres;
+
+  final MovieCatType type;
 }
 
 class GetDetailsMovieEvent extends ApiEvent {
-  GetDetailsMovieEvent(this.movieId, this.movie);
+  GetDetailsMovieEvent(this.movieId);
   final int movieId;
-  final bool movie;
 }
 
 class GetCatsEvent extends ApiEvent {
   GetCatsEvent(this.movies);
   final bool movies;
 }
+
+class GetAccountEvent extends ApiEvent {
+  GetAccountEvent();
+}
+
+class UploadFileEvent extends ApiEvent {
+  UploadFileEvent(this.file);
+  final File file;
+}
+
+class GetAllFilesEvent extends ApiEvent {}

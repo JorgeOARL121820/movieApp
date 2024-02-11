@@ -46,7 +46,7 @@ class MovieEntity {
 class MovieDetailsEntity {
   final bool? adult;
   final String? backdrop_path;
-  final bool? budget;
+  final dynamic budget;
   final List<GenreEntity>? genres;
   final String? homepage;
   final int? id;
